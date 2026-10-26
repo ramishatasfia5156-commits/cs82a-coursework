@@ -1,0 +1,294 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "7d2e1f50",
+   "metadata": {},
+   "source": [
+    "# Module 8 Lab 1: AI-Assisted EDA, Verified\n",
+    "**Course:** CS 82A Introduction to Data Science  \n",
+    "**Name:** Ramisha Tasfia  \n",
+    "**Repo URL:** https://github.com/ramishatasfia5156-commits/cs82a-portfolio"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e7c37a69",
+   "metadata": {},
+   "source": [
+    "## Step 1: Load the data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a7a22e23",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import seaborn as sns\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "# Colab upload (does nothing outside Colab)\n",
+    "try:\n",
+    "    from google.colab import files\n",
+    "    files.upload()\n",
+    "except ImportError:\n",
+    "    pass\n",
+    "\n",
+    "df = pd.read_csv(\"penguins.csv\")\n",
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7d332881",
+   "metadata": {},
+   "source": [
+    "## Step 2: Ground truth by hand (no AI)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "88c4891f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import seaborn as sns\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "# Load the dataset\n",
+    "penguins = pd.read_csv(\"penguins.csv\")\n",
+    "\n",
+    "# Display the dataset shape\n",
+    "print(\"Dataset Shape:\")\n",
+    "print(penguins.shape)\n",
+    "\n",
+    "# Count missing values in each column\n",
+    "print(\"\\nMissing Values per Column:\")\n",
+    "print(penguins.isnull().sum())\n",
+    "\n",
+    "# Count penguins by species\n",
+    "print(\"\\nPenguins per Species:\")\n",
+    "print(penguins[\"species\"].value_counts())"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fff3ab14",
+   "metadata": {},
+   "source": [
+    "**Ground truth summary:**\n",
+    "\n",
+    "The data set includes a total of 344 penguins and 8 columns. I used Pandas to determine the shape of the data set (number of rows/columns), locate missing values for each variable, and to find how many penguins were classified as each of three different species (Adelie, Gentoo, Chinstrap). Of these three species, there are 152 Adelies, 124 Gentoos and 68 Chinstraps. Each of four measurement variables contained 2 missing values, while the sex variable had 11 missing values."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "54a57385",
+   "metadata": {},
+   "source": [
+    "## Prompt Log\n",
+    "**AI assistant used:** Claude (claude.ai)\n",
+    "\n",
+    "### Prompt 1 (full text, Tutorial 3 template filled in)\n",
+    "```\n",
+    "You are helping with exploratory data analysis.\n",
+    "My CSV has columns: species (str), island (str), bill_length_mm (float64), bill_depth_mm (float64), flipper_length_mm (float64), body_mass_g (float64), sex (str), year (int64).\n",
+    "Write Python using pandas and seaborn to:\n",
+    "(1) summarize missing data,\n",
+    "(2) compare flipper_length_mm across species,\n",
+    "(3) produce one labeled chart.\n",
+    "Explain each step in comments.\n",
+    "```\n",
+    "\n",
+    "**Other AI interactions this session:** I pasted the lab instructions and penguins.csv into Claude and asked it to generate the code for Steps 3, 4, and 6.\n",
+    "\n",
+    "### Fixes after running (Step 4)\n",
+    "None needed, code ran without errors."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e539ebb1",
+   "metadata": {},
+   "source": [
+    "## Step 4: AI-generated code (Claude), run as returned"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4d10b4df",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# AI CODE 1: summarize missing data\n",
+    "# Count missing values in each column\n",
+    "missing = df.isna().sum().to_frame(\"missing_count\")\n",
+    "# Add the percent of rows missing for each column\n",
+    "missing[\"missing_pct\"] = (df.isna().mean() * 100).round(2)\n",
+    "# Show only columns that actually have missing values\n",
+    "missing[missing[\"missing_count\"] > 0]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d327b89f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# AI CODE 2: compare flipper_length_mm across species\n",
+    "# Group by species and compute summary statistics for flipper length\n",
+    "flipper_summary = (\n",
+    "    df.groupby(\"species\")[\"flipper_length_mm\"]\n",
+    "      .agg([\"count\", \"mean\", \"median\", \"std\"])\n",
+    "      .round(2)\n",
+    ")\n",
+    "flipper_summary"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1062a92f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# AI CODE 3: one labeled chart\n",
+    "# Boxplot shows the spread of flipper length per species\n",
+    "plt.figure(figsize=(7, 5))\n",
+    "sns.boxplot(data=df, x=\"species\", y=\"flipper_length_mm\")\n",
+    "plt.title(\"Flipper Length by Penguin Species\")\n",
+    "plt.xlabel(\"Species\")\n",
+    "plt.ylabel(\"Flipper length (mm)\")\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d28fad3f",
+   "metadata": {},
+   "source": [
+    "## Step 5: Verification checkpoint"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "5e8e3451",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import seaborn as sns\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "df = pd.read_csv(\"penguins.csv\")\n",
+    "\n",
+    "# Calculate mean flipper length by species\n",
+    "df.groupby(\"species\")[\"flipper_length_mm\"].mean().round(2)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "41d74d3a",
+   "metadata": {},
+   "source": [
+    "**Verification result (log):** MATCH\n",
+    "\n",
+    "Claude’s results varied by zero from mine since each of the three averages was identical; (Adelie = 189.95mm), (Chinstrap = 195.82mm) & (Gentoo = 217.19mm). As a result both calculations included an auto-exclusion of missing data points. Therefore, the accuracy of Claude’s calculation has been confirmed and therefore no correction needed to be made. Which was refreshing since Claude is my go to for reviewing & drafting code."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f8a6e926",
+   "metadata": {},
+   "source": [
+    "## Step 6: Follow-up prompt and judgment\n",
+    "### Prompt 2 (full text)\n",
+    "```\n",
+    "Add one more chart that shows how flipper length relates to body mass, with species shown by color. Keep the labels and comments.\n",
+    "```"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3993b181",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# AI CODE 4 (follow-up): flipper length vs body mass, colored by species\n",
+    "# Scatterplot shows whether the species separate on both measurements\n",
+    "plt.figure(figsize=(7, 5))\n",
+    "sns.scatterplot(data=df, x=\"flipper_length_mm\", y=\"body_mass_g\", hue=\"species\")\n",
+    "plt.title(\"Flipper Length vs Body Mass by Species\")\n",
+    "plt.xlabel(\"Flipper length (mm)\")\n",
+    "plt.ylabel(\"Body mass (g)\")\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3c17542b",
+   "metadata": {},
+   "source": [
+    "**Keep or reject:**\n",
+    "\n",
+    "I am keeping Claude’s suggested chart as it visually demonstrated a positive correlation of flipper length with body weight (mass) for each of the three penguin species by showing them in different colors."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3bd8dec1",
+   "metadata": {},
+   "source": [
+    "## Step 7: My original insight (no AI)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0b6797ff",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df.groupby(\"species\")[\"body_mass_g\"].mean().round(2)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "12cc4a9c",
+   "metadata": {},
+   "source": [
+    "**Insight:**\n",
+    "\n",
+    "One insight I observed that Claude did not directly state was that Gentoo penguins are significantly larger in terms of weight as opposed to the other two species. Using pandas, I identified the average body mass of Gentoo penguins to be 5,076.02 grams whereas the average body masses of Adelie (3,700.66) and Chinstrap (3,733.09) penguins were lower. Therefore, not only do Gentoo penguins have the largest average length of flippers but they also have a large average body mass relative to the other species."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5522c745",
+   "metadata": {},
+   "source": [
+    "## Step 8: Privacy reflection\n",
+    "\n",
+    "I work as a litigation director at a personal injury trial firm in LA. One dataset I would never paste into a public AI tool is client medical records and treatment summaries from the case files I handle at work. These documents contain confidential information, & personal identifying details. Instead, I would use an approved internal tool with appropriate privacy protections or work with anonymized and aggregated data to protect client confidentiality, which our firm does."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
